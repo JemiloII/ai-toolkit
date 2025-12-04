@@ -492,6 +492,8 @@ export default function SimpleJob({
                   options={[
                     { value: 'adamw8bit', label: 'AdamW8Bit' },
                     { value: 'adafactor', label: 'Adafactor' },
+                    { value: 'mars8bit', label: 'MARS8bit' },
+                    { value: 'mars', label: 'MARS' },
                   ]}
                 />
                 <NumberInput
