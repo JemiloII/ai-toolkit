@@ -179,7 +179,7 @@ class MARS8bit(Optimizer):
                 use_muon = state["use_muon"]
 
                 if use_muon:
-                    if len(state) == 0:
+                    if 'step' not in state:
                         state['step'] = 0
                         state['last_grad'] = Auto8bitTensor(torch.zeros_like(p_fp32.data).detach())
                         state['momentum_buffer'] = Auto8bitTensor(torch.zeros_like(p_fp32.data).detach())
@@ -210,7 +210,7 @@ class MARS8bit(Optimizer):
                     copy_stochastic(p.data, p_fp32.data)
 
                 else:
-                    if len(state) == 0:
+                    if 'step' not in state:
                         state['step'] = 0
                         state['exp_avg'] = Auto8bitTensor(torch.zeros_like(p_fp32.data).detach())
                         state['exp_avg_sq'] = Auto8bitTensor(torch.zeros_like(p_fp32.data).detach())

@@ -179,7 +179,7 @@ class MARS(Optimizer):
                 use_muon = state["use_muon"]
 
                 if use_muon:
-                    if len(state) == 0:
+                    if 'step' not in state:
                         state['step'] = 0
                         state['last_grad'] = torch.zeros_like(p_fp32.data).detach()
                         state['momentum_buffer'] = torch.zeros_like(p_fp32.data).detach()
@@ -210,7 +210,7 @@ class MARS(Optimizer):
                     copy_stochastic(p.data, p_fp32.data)
 
                 else:
-                    if len(state) == 0:
+                    if 'step' not in state:
                         state['step'] = 0
                         state['exp_avg'] = torch.zeros_like(p_fp32.data).detach()
                         state['exp_avg_sq'] = torch.zeros_like(p_fp32.data).detach()
