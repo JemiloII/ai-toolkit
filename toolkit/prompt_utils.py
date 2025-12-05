@@ -244,7 +244,7 @@ class EncodedPromptPair:
         return self
 
 
-def concat_prompt_embeds(prompt_embeds: list["PromptEmbeds"]):
+def concat_prompt_embeds(prompt_embeds: list["PromptEmbeds"], model_version: str = None):
     # --- pad text_embeds ---
     if isinstance(prompt_embeds[0].text_embeds, (list, tuple)):
         embed_list = []
@@ -262,7 +262,12 @@ def concat_prompt_embeds(prompt_embeds: list["PromptEmbeds"]):
                     t = torch.cat([t, pad], dim=1)
                 padded.append(t)
             embed_list.append(torch.cat(padded, dim=0))
-        text_embeds = embed_list
+        # For z-image models, use padded list instead of concatenated tensors
+        # This fixes slider training for z-image-turbo
+        if model_version == "zimage":
+            text_embeds = padded
+        else:
+            text_embeds = embed_list
     else:
         max_len = max(p.text_embeds.shape[1] for p in prompt_embeds)
         padded = []
@@ -306,17 +311,17 @@ def concat_prompt_embeds(prompt_embeds: list["PromptEmbeds"]):
     return pe
 
 
-def concat_prompt_pairs(prompt_pairs: list[EncodedPromptPair]):
+def concat_prompt_pairs(prompt_pairs: list[EncodedPromptPair], model_version: str = None):
     weight = prompt_pairs[0].weight
-    target_class = concat_prompt_embeds([p.target_class for p in prompt_pairs])
-    target_class_with_neutral = concat_prompt_embeds([p.target_class_with_neutral for p in prompt_pairs])
-    positive_target = concat_prompt_embeds([p.positive_target for p in prompt_pairs])
-    positive_target_with_neutral = concat_prompt_embeds([p.positive_target_with_neutral for p in prompt_pairs])
-    negative_target = concat_prompt_embeds([p.negative_target for p in prompt_pairs])
-    negative_target_with_neutral = concat_prompt_embeds([p.negative_target_with_neutral for p in prompt_pairs])
-    neutral = concat_prompt_embeds([p.neutral for p in prompt_pairs])
-    empty_prompt = concat_prompt_embeds([p.empty_prompt for p in prompt_pairs])
-    both_targets = concat_prompt_embeds([p.both_targets for p in prompt_pairs])
+    target_class = concat_prompt_embeds([p.target_class for p in prompt_pairs], model_version=model_version)
+    target_class_with_neutral = concat_prompt_embeds([p.target_class_with_neutral for p in prompt_pairs], model_version=model_version)
+    positive_target = concat_prompt_embeds([p.positive_target for p in prompt_pairs], model_version=model_version)
+    positive_target_with_neutral = concat_prompt_embeds([p.positive_target_with_neutral for p in prompt_pairs], model_version=model_version)
+    negative_target = concat_prompt_embeds([p.negative_target for p in prompt_pairs], model_version=model_version)
+    negative_target_with_neutral = concat_prompt_embeds([p.negative_target_with_neutral for p in prompt_pairs], model_version=model_version)
+    neutral = concat_prompt_embeds([p.neutral for p in prompt_pairs], model_version=model_version)
+    empty_prompt = concat_prompt_embeds([p.empty_prompt for p in prompt_pairs], model_version=model_version)
+    both_targets = concat_prompt_embeds([p.both_targets for p in prompt_pairs], model_version=model_version)
     # combine all the lists
     action_list = []
     multiplier_list = []
@@ -441,9 +446,9 @@ class EncodedAnchor:
         return self
 
 
-def concat_anchors(anchors: list[EncodedAnchor]):
-    prompt = concat_prompt_embeds([a.prompt for a in anchors])
-    neg_prompt = concat_prompt_embeds([a.neg_prompt for a in anchors])
+def concat_anchors(anchors: list[EncodedAnchor], model_version: str = None):
+    prompt = concat_prompt_embeds([a.prompt for a in anchors], model_version=model_version)
+    neg_prompt = concat_prompt_embeds([a.neg_prompt for a in anchors], model_version=model_version)
     return EncodedAnchor(
         prompt=prompt,
         neg_prompt=neg_prompt,

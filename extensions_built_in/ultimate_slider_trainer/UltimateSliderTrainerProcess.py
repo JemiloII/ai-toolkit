@@ -376,9 +376,10 @@ class UltimateSliderTrainerProcess(BaseSDTrainProcess):
                     embedding = self.prompt_cache[prompt]
                     embedding = embedding.to(self.device_torch, dtype=dtype)
                     embedding_list.append(embedding)
-                conditional_embeds = concat_prompt_embeds(embedding_list)
+                model_version = self.sd.get_base_model_version()
+                conditional_embeds = concat_prompt_embeds(embedding_list, model_version=model_version)
                 # double up so we can do both sides of the slider
-                conditional_embeds = concat_prompt_embeds([conditional_embeds, conditional_embeds])
+                conditional_embeds = concat_prompt_embeds([conditional_embeds, conditional_embeds], model_version=model_version)
         else:
             # throw error. Not supported yet
             raise Exception("Datasets and targets required for ultimate slider")

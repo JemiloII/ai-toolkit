@@ -120,20 +120,25 @@ class ConceptSliderTrainer(DiffusionTrainer):
             noisy_latents = noisy_latents.to(self.device_torch, dtype=dtype).detach()
 
             batch_size = noisy_latents.shape[0]
+            model_version = self.sd.get_base_model_version()
 
             positive_embeds = concat_prompt_embeds(
-                [self.positive_prompt_embeds] * batch_size
+                [self.positive_prompt_embeds] * batch_size,
+                model_version=model_version
             ).to(self.device_torch, dtype=dtype)
             target_class_embeds = concat_prompt_embeds(
-                [self.target_class_embeds] * batch_size
+                [self.target_class_embeds] * batch_size,
+                model_version=model_version
             ).to(self.device_torch, dtype=dtype)
             negative_embeds = concat_prompt_embeds(
-                [self.negative_prompt_embeds] * batch_size
+                [self.negative_prompt_embeds] * batch_size,
+                model_version=model_version
             ).to(self.device_torch, dtype=dtype)
 
             if self.anchor_class_embeds is not None:
                 anchor_embeds = concat_prompt_embeds(
-                    [self.anchor_class_embeds] * batch_size
+                    [self.anchor_class_embeds] * batch_size,
+                    model_version=model_version
                 ).to(self.device_torch, dtype=dtype)
 
             if self.anchor_class_embeds is not None:
@@ -144,12 +149,14 @@ class ConceptSliderTrainer(DiffusionTrainer):
                         target_class_embeds,
                         negative_embeds,
                         anchor_embeds,
-                    ]
+                    ],
+                    model_version=model_version
                 )
                 num_embeds = 4
             else:
                 combo_embeds = concat_prompt_embeds(
-                    [positive_embeds, target_class_embeds, negative_embeds]
+                    [positive_embeds, target_class_embeds, negative_embeds],
+                    model_version=model_version
                 )
                 num_embeds = 3
 
@@ -218,7 +225,7 @@ class ConceptSliderTrainer(DiffusionTrainer):
 
             if self.anchor_class_embeds is not None:
                 # do a grad inference with our target prompt
-                embeds = concat_prompt_embeds([target_class_embeds, anchor_embeds]).to(
+                embeds = concat_prompt_embeds([target_class_embeds, anchor_embeds], model_version=model_version).to(
                     self.device_torch, dtype=dtype
                 )
 

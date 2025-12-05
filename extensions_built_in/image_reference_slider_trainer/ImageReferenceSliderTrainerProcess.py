@@ -166,7 +166,8 @@ class ImageReferenceSliderTrainerProcess(BaseSDTrainProcess):
                     prompt = prompt[0]
                 prompt_list.append(prompt)
             conditional_embeds = self.sd.encode_prompt(prompt_list).to(self.device_torch, dtype=dtype)
-            conditional_embeds = concat_prompt_embeds([conditional_embeds, conditional_embeds])
+            model_version = self.sd.get_base_model_version()
+            conditional_embeds = concat_prompt_embeds([conditional_embeds, conditional_embeds], model_version=model_version)
 
         # if self.model_config.is_xl:
         #     # todo also allow for setting this for low ram in general, but sdxl spikes a ton on back prop
